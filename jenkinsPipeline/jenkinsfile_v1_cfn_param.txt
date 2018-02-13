@@ -1,0 +1,92 @@
+node{
+			def DASID,DWSID,DDBSID,DDBS2ID,DVID,x,y;
+			def stack="${params.stackName}"
+			def instance="${params.instanceName}"
+			def zone1="${params.availabilityZone1}"
+			def zone2="${params.availabilityZone2}"
+			def logGrp="${params.logGroupName}"
+			def reg="${params.awsRegion}"
+			
+
+      
+                stage('Networking') 
+        {       echo "create the whole networking stack and will output every resource created : vpc id’s , subnet id’s .... "
+				withAWS(credentials:'CFN', region:"${reg}") { 
+                
+				def outputs = cfnUpdate(stack:stack +'-job1', params:["AvailabiltyZone1=${zone1}","AvailabiltyZone2=${zone2}","LogGroupName=${logGrp}"], url:'https://s3-ap-northeast-1.amazonaws.com/aws-roche-demo-cfn-scripts/JOB1v1.template')
+				outputs.each{ k, v -> println "${k}:${v}" }
+             	DASID = outputs.find{ it.key == "DevAppSubnetID" }.value
+				DWSID = outputs.find{ it.key == "DevWebSubnetID" }.value
+				DDBSID = outputs.find{ it.key == "DevDBSubnetID" }.value
+				DDBS2ID = outputs.find{ it.key == "DevDBSubnet2ID" }.value
+				DVID = outputs.find{ it.key == "DevVPCID" }.value
+                   println "Dev app subnet id: " + DASID
+                   println "Dev web subnet id: " + DWSID
+				   println "Dev DB subnet id1: " + DDBSID
+				   println "Dev DB subnet id2: " + DDBS2ID
+				   println "Dev VPC ID: " + DVID
+                    
+               } 
+        } 
+		
+		        stage('Config Compliance') 
+        {        echo "create config. compliance rules"
+					withAWS(credentials:'CFN', region:"${reg}") { 
+                
+				def outputs = cfnUpdate(stack:stack +'-job2', url:'https://s3-ap-northeast-1.amazonaws.com/aws-roche-demo-cfn-scripts/JOB2.template')
+				outputs.each{ k, v -> println "${k}:${v}" }
+         
+                    
+               } 
+        } 
+		
+		        stage('Security logging') 
+        {        echo "create security and audit logging"
+					withAWS(credentials:'CFN', region:"${reg}") { 
+                
+				def outputs = cfnUpdate(stack:stack +'-job3', url:'https://s3-ap-northeast-1.amazonaws.com/aws-roche-demo-cfn-scripts/JOB3v1.template')
+				outputs.each{ k, v -> println "${k}:${v}" }
+         
+                    
+               } 
+        } 
+		
+		        stage('Application Stack ') 
+        {        echo "create Application stack- ELB,EC2 and DB and will output the instance-id"
+                    println "Running stack in Dev app subnet id: " + DASID
+                    println "Running stack in Dev web subnet id: " + DWSID
+				    println "Running stack in Dev DB subnet id1: " + DDBSID
+				    println "Running stack in Dev DB subnet id2: " + DDBS2ID
+				    println "Running stack in Dev VPC ID: " + DVID
+					withAWS(credentials:'CFN', region:"${reg}") { 
+                
+				def outputs = cfnUpdate(stack:stack +'-job4', params:["SubnetId=${DASID}","ELBSubnet=${DWSID}","DBSubnetId1=${DDBSID}","DBSubnetId2=${DDBS2ID}","devVPCId=${DVID}","EC2NameTag=ansible${instance}"], tags:["EC2Name=ansible${instance}"], url:'https://s3-ap-northeast-1.amazonaws.com/aws-roche-demo-cfn-scripts/JOB4.template')
+				outputs.each{ k, v -> println "${k}:${v}" } 
+				x = outputs.find{ it.key == "AppServerPrivateIp" }.value
+				y = outputs.find{ it.key == "AppServerPrivateDNS" }.value
+				
+				println "New EC2 App server private IP is: " + x
+				println "New EC2 App server private DNS is: " + y
+         
+					}
+					
+				
+               }
+             
+        mail (to: "rahul-ra@hcl.com, kunal.si@hcl.com, arpittripathi@hcl.com",
+				subject: "AWS Cloud Formation Updates",
+				body: 
+				"AWS Cloud Formation is Success, here are the details- " +
+				"Dev app subnet id: " + DASID +
+                "Dev web subnet id: " + DWSID +
+				"Dev DB subnet id1: " + DDBSID +
+				"Dev DB subnet id2: " + DDBS2ID +
+				"Dev VPC ID: " + DVID +
+				"EC2 App server private IP: " + x +
+				"EC2 App server private DNS: " + y)
+        
+                echo "Sending notification of aws cloud formation details"        
+             
+               
+        
+}

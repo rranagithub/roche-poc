@@ -1,0 +1,76 @@
+node{
+			def DASID,DWSID,DDBSID,DDBS2ID,DVID,x,y;
+			def stack="${params.stackName}"
+			def instance="${params.instanceName}"
+
+      
+                stage('Networking') 
+        {       echo "create the whole networking stack and will output every resource created : vpc id’s , subnet id’s .... "
+				withAWS(credentials:'CFN', region:'ap-northeast-1') { 
+                
+				def outputs = cfnUpdate(stack:stack +'-job1', url:'https://s3-ap-northeast-1.amazonaws.com/aws-roche-demo-cfn-scripts/JOB1v1.template')
+				outputs.each{ k, v -> println "${k}:${v}" }
+             	DASID = outputs.find{ it.key == "DevAppSubnetID" }.value
+				DWSID = outputs.find{ it.key == "DevWebSubnetID" }.value
+				DDBSID = outputs.find{ it.key == "DevDBSubnetID" }.value
+				DDBS2ID = outputs.find{ it.key == "DevDBSubnet2ID" }.value
+				DVID = outputs.find{ it.key == "DevVPCID" }.value
+                   println "Dev app subnet id: " + DASID
+                   println "Dev web subnet id: " + DWSID
+				   println "Dev DB subnet id1: " + DDBSID
+				   println "Dev DB subnet id2: " + DDBS2ID
+				   println "Dev VPC ID: " + DVID
+                    
+               } 
+        } 
+		
+		        stage('Config Compliance') 
+        {        echo "create config. compliance rules"
+					withAWS(credentials:'CFN', region:'ap-northeast-1') { 
+                
+				def outputs = cfnUpdate(stack:stack +'-job2', url:'https://s3-ap-northeast-1.amazonaws.com/aws-roche-demo-cfn-scripts/JOB2.template')
+				outputs.each{ k, v -> println "${k}:${v}" }
+         
+                    
+               } 
+        } 
+		
+		        stage('Security logging') 
+        {        echo "create security and audit logging"
+					withAWS(credentials:'CFN', region:'ap-northeast-1') { 
+                
+				def outputs = cfnUpdate(stack:stack +'-job3', url:'https://s3-ap-northeast-1.amazonaws.com/aws-roche-demo-cfn-scripts/JOB3v1.template')
+				outputs.each{ k, v -> println "${k}:${v}" }
+         
+                    
+               } 
+        } 
+		
+		        stage('Application Stack ') 
+        {        echo "create Application stack- ELB,EC2 and DB and will output the instance-id"
+                    println "Dev app subnet id: " + DASID
+                    println "Dev web subnet id: " + DWSID
+				    println "Dev DB subnet id1: " + DDBSID
+				    println "Dev DB subnet id2: " + DDBS2ID
+				    println "Dev VPC ID: " + DVID
+					withAWS(credentials:'CFN', region:'ap-northeast-1') { 
+                
+				def outputs = cfnUpdate(stack:stack +'-job4', params:["SubnetId=${DASID}","ELBSubnet=${DWSID}","DBSubnetId1=${DDBSID}","DBSubnetId2=${DDBS2ID}","devVPCId=${DVID}","EC2NameTag=ansible${instance}"], tags:["EC2Name=ansible${instance}"], url:'https://s3-ap-northeast-1.amazonaws.com/aws-roche-demo-cfn-scripts/JOB4.template')
+				outputs.each{ k, v -> println "${k}:${v}" } 
+				x = outputs.find{ it.key == "AppServerPrivateIp" }.value
+				y = outputs.find{ it.key == "AppServerPrivateDNS" }.value
+         
+					}
+               }
+               
+               stage('Ansible Tower')
+        {       echo "Calling Ansible Job"
+                build job: 'Environment-Provisioning-Pipeline', 
+				parameters: [
+                        [$class:'StringParameterValue', name:'cfn_ip_address', value:x],
+                        [$class:'StringParameterValue', name:'privateDNS', value:y]
+                        ]
+        } 
+         
+        
+}

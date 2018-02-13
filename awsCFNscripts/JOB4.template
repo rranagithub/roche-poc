@@ -1,0 +1,677 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "EC2 Deployment",
+  "Metadata":{
+  "AWS::CloudFormation::Interface": {
+ 
+			"ParameterGroups": [
+			    
+	                            {
+					"Label": {
+						"default": "EC2 Parameters"
+					},
+					"Parameters": [
+					    "devVPCId",
+						"ImageId",
+						"InstanceType",
+						"SubnetId",
+						"KeyName",
+                        "EC2NameTag"						
+					]
+				   },           
+
+				    {
+					"Label": {
+						"default": "RDS DB Parameters"
+					},
+					"Parameters": [
+					
+					    "DBClusterIdentifier",
+						"DBEngine",
+                        "DBInstanceClass",
+                        "DBInstanceIdentifier",
+                        "DBName",
+                        "DBSecurityGroups",
+	                    "DBSubnetGroupName",
+	                    "DBSubnetGroupDescription",
+	                    "MasterUsername",
+                        "MasterUserPassword",
+						"AllocatedStorage"
+                                                               
+					]
+				   }, 
+				      {
+					"Label": {
+						"default": "ELB Parameters"
+					},
+					"Parameters": [
+					
+					    "ELBName",
+                        "ELBHealthyThreshold",
+                        "ELBInterval",
+                        "ELBTarget",
+                        "ELBTimeout",
+                        "ELBUnhealthyThreshold",
+                        "ELBSecurityGroups", 
+                        "ELBSubnet"                                          
+					]
+				   },                             
+                                    {
+					"Label": {
+						"default": "Tags"
+					},
+					"Parameters": [
+						"Tag1",
+						"Tag2",
+						"Tag3",
+						"Tag4",
+						"Tag5"
+					]
+				}
+				
+				
+			         ],                                                
+
+                            "ParameterLabels": {
+
+					    "devVPCId" : {"default":"HIPAA Dev VPC Id"},
+                        "ImageId" : {"default":"AMI ID"},
+						"InstanceType" : {"default":"Instance Type"},
+						"SubnetId" : {"default":"SubnetId"},
+						"KeyName" : {"default":"EC2 Key Pair name"},   
+						"EC2NameTag" : {"default":"EC2 Name Tag"},
+
+						"DBClusterIdentifier" : {"default":"DB Cluster Identifier"},
+                        "DBInstanceClass" : {"default":"DB Instance Class"},
+						"DBEngine" : {"default":"DB Engine"},
+                        "DBInstanceIdentifier" : {"default":"DB Instance Identifier"},
+                        "DBName" : {"default":"DB Name"},
+                        "DBSubnetGroupDescription" : { "default": "DB Subnet Group Description" },
+                        "DBSubnetGroupName" : { "default" : "DB Subnet Group Name" },
+	                    "MasterUsername" : {"default":"Master Username"},
+                        "MasterUserPassword" : {"default":"Master User Password"},
+						"AllocatedStorage" : {"default":"DB Storage Size"},
+
+						"ELBName" : {"default":"ELB Name"},
+                        "ELBHealthyThreshold" : {"default":"ELB Healthy Threshold"},
+                        "ELBInterval" : {"default":"ELB Interval"},
+                        "ELBTarget" : {"default":"ELB Target"},
+                        "ELBTimeout" : {"default":"ELB Timeout"},
+                        "ELBUnhealthyThreshold" : {"default":"ELB Unhealthy Threshold"},  					
+                        "ELBSubnet" : {"default":"ELB HIPAA Dev Web Subnet Id"},  						
+                        
+						"Tag1":{"default":"Dept"},
+						"Tag2":{"default":"Environment"},
+						"Tag3":{"default":"CostCenter"},
+						"Tag4":{"default":"Region"},
+						"Tag5":{"default":"NetworkType"} 
+				
+
+                      }
+		}
+    },
+
+ "Parameters" : {
+        
+        "devVPCId" : {
+			"Description": "HIPAA Dev VPC Id",
+			"Type": "String",
+			"Default": "vpc-xxxxx"
+		},
+
+		"ImageId" : {
+			"Description": "EC2 AMI ID",
+			"Type": "String",
+			"Default": "ami-bfb1d9d9",
+		    "AllowedValues" : ["ami-bfb1d9d9","ami-eb50cd8d","ami-157fe573"]
+		},
+		"InstanceType": {
+			"Description": "Choose EC2 instance tier.",
+			"Type": "String",
+			"Default": "t2.micro",
+			  "AllowedValues" : [ "t1.micro", "t2.micro", "t2.small", "t2.medium", "t2.large","m1.small", "m1.medium", "m1.large", "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge", "m4.large", "m4.xlarge", "m4.2xlarge", "m4.4xlarge", "m4.10xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge", "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "g2.2xlarge", "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "d2.xlarge",
+			  "d2.2xlarge", "d2.4xlarge", "d2.8xlarge", "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"]
+	
+		},
+        "SubnetId": {
+			"Description": "EC2 HIPAA dev VPC App Subnet ID.",
+			"Type": "String",
+			"Default": "subnet-xxxxxx"		
+		},	
+		
+		"KeyName": {
+			"Description": "Key Name for EC2.",
+			"Type": "String",
+			"Default": "management"
+		},	
+		
+		"EC2NameTag": {
+			"Description": "Name Tag for EC2.",
+			"Type": "String",
+			"Default": "ansibleAppServer"
+		},	
+
+		
+		"DBClusterIdentifier" : {
+			"Description": "DB Cluster Identifier.",
+			"Type": "String",
+			"Default": "mydb-cfn-jenkins"
+		},
+		  "DBEngine" : {
+			"Description": "DB Engine.",
+			"Type": "String",
+			"Default": "MySQL",
+			"AllowedValues" : ["aurora", "aurora-postgresql", "mariadb", "MySQL", "oracle-ee", "oracle-se2", "oracle-se1", "oracle-se", "postgres", "sqlserver-ee", "sqlserver-se", "sqlserver-ex", "sqlserver-web"]
+		},
+             "DBInstanceClass" : {
+			"Description": "DB Instance Class.",
+			"Type": "String",
+			"Default": "db.t2.small",
+			"AllowedValues" : ["db.t2.micro","db.t2.small","db.t2.medium","db.t2.large","db.t2.xlarge","db.t2.2xlarge","db.m2.xlarge","db.m2.2xlarge","db.m2.xlarge","db.m2.2xlarge","db.m2.4xlarge","db.r3.large","db.r3.xlarge","db.r3.2xlarge","db.r3.4xlarge"]
+		},
+            "DBInstanceIdentifier" : {
+			"Description": "DB Instance Identifier.",
+			"Type": "String",
+			"Default": "mydb-cfn-jenkins"
+		},
+            "DBName" : {
+			"Description": "DB Name.",
+			"Type": "String",
+			"Default": "mydb"
+		},
+		 "DBSubnetGroupDescription" : {
+			"Description": "DB Subnet Group Description.",
+			"Type": "String",
+			"Default": "JenkinsRDSDBSbnt"
+		},
+                        "DBSubnetGroupName" : {
+			"Description": "DB Subnet Group Name.",
+			"Type": "String",
+			"Default": "JenkinsRDSDBSbnt"
+		},
+
+	                    "MasterUsername" : {
+			"Description": "DB Master Username.",
+			"Type": "String",
+			"Default": "jenkins"
+		},
+                        "MasterUserPassword" : {
+			"Description": "Master User Password.",
+			"Type": "String",
+			"Default": "jenkins#12345"
+		},
+		"AllocatedStorage" : { 
+		"Description": "DB Storage Allocation.",
+			"Type": "String",
+			"Default": "20"
+		},		
+		
+
+		
+      "DBSubnetId1" : { 
+		"Description": "DB Subnet Group Subnet Id 1.",
+			"Type": "String",
+			"Default": "sub-xxxxx"
+		},
+		"DBSubnetId2" : { 
+		"Description": "DB Subnet Group Subnet Id 2.",
+			"Type": "String",
+			"Default": "sub-xxxxx"
+		},
+
+	  "ELBName" : {
+			"Description": "ELB Name.",
+			"Type": "String",
+			"Default": "JenkinsELB"
+		},
+                        "ELBHealthyThreshold" : {
+			"Description": "Key Name for EC2.",
+			"Type": "String",
+			"Default": "2"
+		},
+                        "ELBInterval" : {
+			"Description": "Key Name for EC2.",
+			"Type": "String",
+			"Default": "5"
+		},
+                        "ELBTarget" : {
+			"Description": "Key Name for EC2.",
+			"Type": "String",
+			"Default": "HTTP:9090/"
+		},
+                        "ELBTimeout" : {
+			"Description": "Key Name for EC2.",
+			"Type": "String",
+			"Default": "3"
+		},
+                        "ELBUnhealthyThreshold" : {
+			"Description": "ELB Unhealthy Threshold.",
+			"Type": "String",
+			"Default": "2"			
+			
+		},
+		"ELBSubnet" : {
+			"Description": "ELB HIPAA Web Subnet Id.",
+			"Type": "String"		
+			
+		},
+
+		   "InstancePort": {
+			"Description": "ELB Unhealthy Threshold.",
+			"Type": "String",
+			"Default": "9090"			
+			
+		},
+         "InstanceProtocol": {
+			"Description": "ELB Unhealthy Threshold.",
+			"Type": "String",
+			"Default": "HTTP"			
+			
+		},
+         "LoadBalancerPort": {
+			"Description": "ELB Unhealthy Threshold.",
+			"Type": "String",
+			"Default": "80"			
+			
+		},
+         "Protocol":{
+			"Description": "ELB Unhealthy Threshold.",
+			"Type": "String",
+			"Default": "HTTP"			
+			
+		},
+		
+		
+		
+
+"Tag1": {
+      "Type": "String",
+      "Default": "Mycloud"
+    },
+	
+	"Tag2": {
+      "Type": "String",
+      "Default": "Mngmnt"
+    },
+	
+	"Tag3": {
+      "Type": "String",
+      "Default": "Mycloud"
+    },
+	
+	"Tag4": {
+      "Type": "String",
+      "Default": "ap-northeast-1"
+    },
+	
+	"Tag5": {
+      "Type": "String",
+      "Default": "IPV4/6"
+    }
+	
+  },
+
+"Resources" : {
+  					
+	"ELB": {
+    "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+    "Properties": {
+      "HealthCheck": {
+       "HealthyThreshold": { "Ref" : "ELBHealthyThreshold" },
+       "Interval": { "Ref" : "ELBInterval" },
+       "Target":{ "Ref" : "ELBTarget" },
+       "Timeout": { "Ref" : "ELBTimeout" },
+       "UnhealthyThreshold": { "Ref" : "ELBUnhealthyThreshold" }
+	   },
+     
+     "Listeners": [{
+         "InstancePort": { "Ref" : "InstancePort" },
+         "InstanceProtocol": { "Ref" : "InstanceProtocol" },
+         "LoadBalancerPort": { "Ref" : "LoadBalancerPort" },
+         "Protocol": { "Ref" : "Protocol" }
+     }],
+     "LoadBalancerName" : { "Ref": "ELBName" },
+     "Scheme": "internet-facing",
+     "Subnets": [ { "Ref": "ELBSubnet" } ],
+     "SecurityGroups": [ { "Ref": "ELBSecurityGroup" } ],
+     "Instances": [
+       { "Ref": "EC2" }
+       
+     ],
+     "Tags": [ {"Key": "Name", "Value": "JenkinsELB"},
+	  {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 {"Key": "Environment","Value": {"Ref": "Tag2"}},
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }   
+				]
+  }
+},
+
+"ELBSecurityGroup" : {
+   "Type" : "AWS::EC2::SecurityGroup",
+   "Properties" : {
+      "GroupDescription" : "Allows HTTP to client host",
+      "VpcId" : {"Ref" : "devVPCId"},
+      "SecurityGroupIngress" : [{
+            "IpProtocol" : "TCP",
+            "FromPort" : "80",
+            "ToPort" : "80",
+            "CidrIp" : "0.0.0.0/0"
+         }]
+   }
+},  
+
+   "ELBSGIngress": 
+   {
+  "Type" : "AWS::EC2::SecurityGroupIngress",
+  "Properties" : {
+  
+    "Description" : "EC2 security group ingress from ELB SG",
+    "FromPort" : 9090,
+    "GroupId" : { "Ref" : "ELBSecurityGroup" },
+    "IpProtocol" : "TCP",
+     "CidrIp" : "0.0.0.0/0",
+    "ToPort" : 9090
+  }
+},
+
+   "ELBSGIngress": 
+   {
+  "Type" : "AWS::EC2::SecurityGroupIngress",
+  "Properties" : {
+  
+    "Description" : "EC2 security group ingress from ELB SG",
+    "FromPort" : 443,
+    "GroupId" : { "Ref" : "ELBSecurityGroup" },
+    "IpProtocol" : "TCP",
+     "CidrIp" : "0.0.0.0/0",
+    "ToPort" : 443
+  }
+},
+
+ "EC2": {					
+   "Type" : "AWS::EC2::Instance",
+   "Properties" : {
+     
+     
+      "ImageId" : { "Ref" : "ImageId" },
+      "InstanceType" : { "Ref" : "InstanceType" },
+      "KeyName" : { "Ref" : "KeyName" },
+      "SecurityGroupIds" : [ { "Ref" : "AppServerSecurityGroup" } ],
+      "SubnetId" : { "Ref" : "SubnetId" },
+      "Tags" : [ {"Key": "Name", "Value":  {"Ref": "EC2NameTag"}},
+	  {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 {"Key": "Environment","Value": {"Ref": "Tag2"}},
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }   
+				]  
+     
+   }},
+
+
+"AppServerSecurityGroup" : {
+   "Type" : "AWS::EC2::SecurityGroup",
+   "Properties" : {
+      "GroupDescription" : "Allows ELB to reach App Server",
+      "VpcId" : {"Ref" : "devVPCId"}
+   }
+}, 
+
+   "EC2SGIngress": 
+   {
+  "Type" : "AWS::EC2::SecurityGroupIngress",
+  "Properties" : {
+  
+    "Description" : "EC2 security group ingress from ELB SG",
+    "FromPort" : 9090,
+    "GroupId" : { "Ref" : "AppServerSecurityGroup" },
+    "IpProtocol" : "TCP",
+     "CidrIp" : "0.0.0.0/0",
+    "ToPort" : 9090
+  }
+},
+
+   "EC21SGIngress": 
+   {
+  "Type" : "AWS::EC2::SecurityGroupIngress",
+  "Properties" : {
+  
+    "Description" : "EC2 security group ingress from ELB SG",
+    "FromPort" : 443,
+    "GroupId" : { "Ref" : "AppServerSecurityGroup" },
+    "IpProtocol" : "TCP",
+     "CidrIp" : "0.0.0.0/0",
+    "ToPort" : 443
+  }
+},
+
+   "EC22SGIngress": 
+   {
+  "Type" : "AWS::EC2::SecurityGroupIngress",
+  "Properties" : {
+  
+    "Description" : "EC2 security group ingress from ELB SG",
+    "FromPort" : 22,
+    "GroupId" : { "Ref" : "AppServerSecurityGroup" },
+    "IpProtocol" : "TCP",
+     "CidrIp" : "0.0.0.0/0",
+    "ToPort" : 22
+  }
+},
+
+   "EC23SGIngress": 
+   {
+  "Type" : "AWS::EC2::SecurityGroupIngress",
+  "Properties" : {
+  
+    "Description" : "EC2 security group ingress from ELB SG",
+    "FromPort" : 3389,
+    "GroupId" : { "Ref" : "AppServerSecurityGroup" },
+    "IpProtocol" : "TCP",
+     "CidrIp" : "0.0.0.0/0",
+    "ToPort" : 3389
+  }
+},
+
+   "EC24SGIngress": 
+   {
+  "Type" : "AWS::EC2::SecurityGroupIngress",
+  "Properties" : {
+  
+    "Description" : "EC2 security group ingress from ELB SG",
+    "FromPort" : 9000,
+    "GroupId" : { "Ref" : "AppServerSecurityGroup" },
+    "IpProtocol" : "TCP",
+     "CidrIp" : "0.0.0.0/0",
+    "ToPort" : 9000
+  }
+},
+
+   "EC25SGIngress": 
+   {
+  "Type" : "AWS::EC2::SecurityGroupIngress",
+  "Properties" : {
+  
+    "Description" : "EC2 security group ingress from ELB SG",
+    "FromPort" : 8080,
+    "GroupId" : { "Ref" : "AppServerSecurityGroup" },
+    "IpProtocol" : "TCP",
+     "CidrIp" : "0.0.0.0/0",
+    "ToPort" : 8080
+  }
+},
+
+
+   "EC26SGIngress": 
+   {
+  "Type" : "AWS::EC2::SecurityGroupIngress",
+  "Properties" : {
+  
+    "Description" : "EC2 security group ingress from ELB SG",
+    "FromPort" : 46160,
+    "GroupId" : { "Ref" : "AppServerSecurityGroup" },
+    "IpProtocol" : "TCP",
+    "CidrIp" : "0.0.0.0/0",
+    "ToPort" : 46160
+  }
+},
+
+   "EC27SGIngress": 
+   {
+  "Type" : "AWS::EC2::SecurityGroupIngress",
+  "Properties" : {
+  
+    "Description" : "EC2 security group ingress from ELB SG",
+    "FromPort" : 21826,
+    "GroupId" : { "Ref" : "AppServerSecurityGroup" },
+    "IpProtocol" : "TCP",
+     "CidrIp" : "0.0.0.0/0",
+    "ToPort" : 21826
+  }
+},
+
+   "EC28SGIngress": 
+   {
+  "Type" : "AWS::EC2::SecurityGroupIngress",
+  "Properties" : {
+  
+    "Description" : "EC2 security group ingress from ELB SG",
+    "FromPort" : 5986,
+    "GroupId" : { "Ref" : "AppServerSecurityGroup" },
+    "IpProtocol" : "TCP",
+     "CidrIp" : "0.0.0.0/0",
+    "ToPort" : 5986
+  }
+},
+
+   "EC29SGIngress": 
+   {
+  "Type" : "AWS::EC2::SecurityGroupIngress",
+  "Properties" : {
+  
+    "Description" : "EC2 security group ingress from ELB SG",
+    "FromPort" : 3306,
+    "GroupId" : { "Ref" : "AppServerSecurityGroup" },
+    "IpProtocol" : "TCP",
+     "CidrIp" : "0.0.0.0/0",
+    "ToPort" : 3306
+  }
+},
+
+   "EC20SGIngress": 
+   {
+  "Type" : "AWS::EC2::SecurityGroupIngress",
+  "Properties" : {
+  
+    "Description" : "EC2 security group ingress from ELB SG",
+    "FromPort" : 5985,
+    "GroupId" : { "Ref" : "AppServerSecurityGroup" },
+    "IpProtocol" : "TCP",
+    "CidrIp" : "0.0.0.0/0",
+    "ToPort" : 5985
+  }
+},
+
+   "EC31SGIngress": 
+   {
+  "Type" : "AWS::EC2::SecurityGroupIngress",
+  "Properties" : {
+  
+    "Description" : "EC2 security group ingress from ELB SG",
+    "FromPort" : 80,
+    "GroupId" : { "Ref" : "AppServerSecurityGroup" },
+    "IpProtocol" : "TCP",
+    "CidrIp" : "0.0.0.0/0",
+    "ToPort" : 80
+  }
+},
+
+
+   "Database": {
+   
+  "Type" : "AWS::RDS::DBInstance",
+  "Properties" :
+  {
+   "AllocatedStorage" : { "Ref" : "AllocatedStorage" },
+    "DBClusterIdentifier" :{ "Ref" : "DBClusterIdentifier" },
+    "DBInstanceClass" : { "Ref" : "DBInstanceClass" },
+    "DBInstanceIdentifier" : { "Ref" : "DBInstanceIdentifier" },
+    "Engine" : { "Ref" : "DBEngine" },
+    "DBName" :{ "Ref" : "DBName" },
+    "DBParameterGroupName" :  "jenkins-mysql" ,
+    "DBSecurityGroups" : [ { "Ref" : "DBSecurityGroup" } ],
+	"DBSubnetGroupName" :{ "Ref" : "DatabaseSBNT" },
+	"MasterUsername" : { "Ref" : "MasterUsername" },
+    "MasterUserPassword" : { "Ref" : "MasterUserPassword" },
+	"Tags" : [ {"Key": "Name", "Value": "JenkinsDBServer"},
+	  {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 {"Key": "Environment","Value": {"Ref": "Tag2"}},
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }   
+				]  
+   }
+},
+"DBSecurityGroup": {
+   "Type": "AWS::RDS::DBSecurityGroup",
+   "Properties": {
+      "EC2VpcId" : {"Ref" : "devVPCId"},
+      "DBSecurityGroupIngress": { "EC2SecurityGroupId": { "Ref": "AppServerSecurityGroup" } },
+      "GroupDescription"      : "Access to EC2",
+      "Tags" : [ {"Key": "Name", "Value": "JenkinsDBSG"},
+	  {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 {"Key": "Environment","Value": {"Ref": "Tag2"}},
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }   
+				] 
+   }
+},
+  "DatabaseSBNT":{
+   "Type" : "AWS::RDS::DBSubnetGroup",
+   "Properties" : {
+      "DBSubnetGroupDescription" : { "Ref" : "DBSubnetGroupDescription" },
+      "DBSubnetGroupName" : { "Ref" : "DBSubnetGroupName" },
+      "SubnetIds" : [{ "Ref" : "DBSubnetId1" }, { "Ref" : "DBSubnetId2" }],
+      "Tags" : [ {"Key": "Name", "Value": "JenkinsDBSBNT"},
+	  {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 {"Key": "Environment","Value": {"Ref": "Tag2"}},
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }   
+				]
+   }
+}
+},
+"Outputs" : {
+  
+    "RDSEndpoint" : {
+      "Value" : { "Fn::GetAtt" : [ "Database", "Endpoint.Address" ]},
+      "Description" : "RDS DB Instance Endpoint"
+    },
+    "RDSConnectionPort" : {
+      "Value" : { "Fn::GetAtt" : [ "Database", "Endpoint.Port" ]},
+      "Description" : "RDS DB Instance Connection Port"
+    },
+    "ELBDNSName" : {
+      "Value" : { "Fn::GetAtt" : [ "ELB", "DNSName" ]},
+      "Description" : "ELB DNS Name"
+    },
+    "AppServerPrivateDNS" : {
+      "Value" : { "Fn::GetAtt" : [ "EC2", "PrivateDnsName" ]},
+      "Description" : "EC2 App Server Private DNS Name"
+    },
+	"AppServerPrivateIp" : {
+      "Value" : { "Fn::GetAtt" : [ "EC2", "PrivateIp" ]},
+      "Description" : "EC2 App Server Private Ip"
+    },
+    "AppServerInstanceId" : {
+      "Value" : {"Ref": "EC2"},
+      "Description" : "EC2 App Server Private DNS Name"
+    }
+  }
+}
+

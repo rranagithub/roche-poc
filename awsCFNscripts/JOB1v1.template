@@ -1,0 +1,2283 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "",
+"Metadata":{
+"AWS::CloudFormation::Interface": {
+			"ParameterGroups": [
+			{
+					"Label": {
+						"default": "General"
+					},
+					"Parameters": [
+						"AvailabiltyZone1",
+					    "AvailabiltyZone2",
+						"AccountIdVPCPeering",
+						"LogGroupName"
+					]
+				},
+		
+                        {
+					"Label": {
+						"default": "Production Network"
+					},
+					"Parameters": [
+						"prodVNetworkCIDR",
+						"prodApplZ1SbntCIDR",
+						
+						"prodDBZ1SbntCIDR",
+					
+						"prodPubZ1SbntCIDR"
+						
+	      								
+
+					]
+				},
+
+                                {
+					"Label": {
+						"default": "QA Network"
+					},
+					"Parameters": [
+						"qaVNetworkCIDR",
+						"qaApplZ1SbntCIDR",
+						
+						"qaDBZ1SbntCIDR",
+					
+						"qaPubZ1SbntCIDR"
+						
+						
+					]
+				},
+
+				{
+					"Label": {
+						"default": "Dev Network"
+					},
+					"Parameters": [
+						"devVNetworkCIDR",
+						"devApplZ1SbntCIDR",
+						
+						"devDBZ1SbntCIDR",
+						 "devDBZ2SbntCIDR",
+						"devPubZ1SbntCIDR"
+						
+						
+					]
+				},
+				
+				
+				{
+					"Label": {
+						"default": "Tags"
+					},
+					"Parameters": [
+						"Tag1",
+						"Tag2",
+						"Tag3",
+						"Tag4",
+						"Tag5"
+					]
+				}
+				
+				
+			],
+			"ParameterLabels": {
+
+                                               
+			       
+
+				"qaVNetworkCIDR":{"default":" IP Address"},
+						"qaApplZ1SbntCIDR":{"default":"Zone 1 Application Block IP"},
+					
+						"qaPubZ1SbntCIDR":{"default":"Zone 1 Web Block IP"},
+						
+						"qaDBZ1SbntCIDR":{"default":"Zone 1 Database Block IP"},
+						
+				"prodVNetworkCIDR": {"default" : " IP Address"},
+						"prodApplZ1SbntCIDR":{"default":"Zone 1 Application Block IP"},
+						
+						"prodPubZ1SbntCIDR":{"default":"Zone 1 Web Block IP"},
+						
+						"prodDBZ1SbntCIDR":{"default":"Zone 1 Database Block IP"},
+					
+				"devVNetworkCIDR":{"default":" IP Address"},
+						"devApplZ1SbntCIDR":{"default":"Zone 1 Application Block IP"},
+						
+						"devPubZ1SbntCIDR":{"default":"Zone 1 Web Block IP"},
+						
+						"devDBZ1SbntCIDR":{"default":"Zone 1 Database Block IP"},
+						
+                        "devDBZ2SbntCIDR":{"default":"Zone 2 Database Block IP"},
+
+						"AvailabiltyZone1":{"default":"Zone 1"},
+
+						"AvailabiltyZone2":{"default":"Zone 2"},
+						"LogGroupName" : {"default":"VPC Flow Logs Group Name"},
+					
+						"AccountIdVPCPeering":{"default":"Account ID"},
+
+						"Tag1":{"default":"Dept"},
+					
+						"Tag3":{"default":"CostCenter"},
+						"Tag4":{"default":"Region"},
+						"Tag5":{"default":"NetworkType"}
+						
+
+			}
+		}
+},
+  
+  "Parameters" : {
+
+		"AvailabiltyZone1": {
+			"Description": "Subnet 1 availability zone.",
+			"Type": "AWS::EC2::AvailabilityZone::Name",
+                        "Default": "ap-northeast-1a"
+		},
+		"AvailabiltyZone2": {
+			"Description": "Subnet 2 availability zone.",
+			"Type": "AWS::EC2::AvailabilityZone::Name",
+                        "Default": "ap-northeast-1c"
+		},
+		"LogGroupName" : {
+			"Description": "VPC Flow Logs Group Name.",
+			"Type": "String",
+            "Default": "JenkinsVPCFlowLogs"
+		},
+		"prodVNetworkCIDR": {
+			"Description": "CIDR of Production Network",
+			"Type": "String",
+			"Default": "10.100.0.0/16",
+			
+			"ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x."
+		},
+		"prodPubZ1SbntCIDR": {
+			"Description": "Public Tier Subnet CIDR block for AZ1 for Production Network.",
+			"Type": "String",
+			"Default": "10.100.1.0/24",
+		
+			"ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x and subnet of pVpc."
+		},
+	
+		"prodApplZ1SbntCIDR": {
+			"Description": "Application Tier Subnet CIDR block for AZ1 for Production Network.",
+			"Type": "String",
+			"Default": "10.100.2.0/24",
+			
+			"ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x and subnet of pVpc."
+		},
+	
+		"prodDBZ1SbntCIDR": {
+			"Description": "Database Tier Subnet CIDR block for AZ1 for Production Network",
+			"Type": "String",
+			"Default": "10.100.3.0/24",
+			
+			"ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x and subnet of pVpc."
+		},
+		
+
+		
+		"qaVNetworkCIDR": {
+			"Description": "CIDR of QA Network",
+			"Type": "String",
+			"Default": "10.101.0.0/16",
+		
+			"ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x."
+		},
+		"qaPubZ1SbntCIDR": {
+			"Description": "Public Tier Subnet CIDR block for AZ1 for QA Network.",
+			"Type": "String",
+			"Default": "10.101.1.0/24",
+			
+			"ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x and subnet of pVpc."
+		},
+	
+		"qaApplZ1SbntCIDR": {
+			"Description": "Application Tier Subnet CIDR block for AZ1 for QA Network.",
+			"Type": "String",
+			"Default": "10.101.2.0/24",
+		
+			"ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x and subnet of qVpc."
+		},
+	
+		"qaDBZ1SbntCIDR": {
+			"Description": "Database Tier Subnet CIDR block for AZ1 for QA Network.",
+			"Type": "String",
+			"Default": "10.101.3.0/24",
+		
+			"ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x and subnet of qVpc."
+		},
+
+		"devVNetworkCIDR": {
+			"Description": "CIDR of dev Network",
+			"Type": "String",
+			"Default": "10.102.0.0/16",
+		
+			"ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x."
+		},
+		"devPubZ1SbntCIDR": {
+			"Description": "Public Tier Subnet CIDR block for AZ1 for dev Network.",
+			"Type": "String",
+			"Default": "10.102.1.0/24",
+			
+			"ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x and subnet of dVpc."
+		},
+
+		"devApplZ1SbntCIDR": {
+			"Description": "Application Tier Subnet CIDR block for AZ1 for dev Network",
+			"Type": "String",
+			"Default": "10.102.2.0/24",
+		
+			"ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x and subnet of dVpc."
+		},
+
+		"devDBZ1SbntCIDR": {
+			"Description": "Database Tier Subnet CIDR block for AZ1 for dev Network",
+			"Type": "String",
+			"Default": "10.102.3.0/24",
+			
+			"ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x and subnet of dVpc."
+		},
+		"devDBZ2SbntCIDR": {
+			"Description": "Database Tier Subnet CIDR block for AZ1 for dev Network",
+			"Type": "String",
+			"Default": "10.102.6.0/24",
+			
+			"ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x and subnet of dVpc."
+		},
+
+
+
+	"AccountIdVPCPeering": {
+      "Type": "String",
+      "Description": "Peer VPC Account ID",
+     
+	  "Default": "386777780151",
+      "ConstraintDescription": "Peer Owner ID"
+    },
+	
+	"Tag1": {
+      "Type": "String",
+      "Default": "Mycloud"
+    },
+	
+
+	
+	"Tag3": {
+      "Type": "String",
+      "Default": "Mycloud"
+    },
+	
+	"Tag4": {
+      "Type": "String",
+      "Default": "ap-northeast-1"
+    },
+	
+	"Tag5": {
+      "Type": "String",
+      "Default": "IPV4/6"
+    }
+	
+  },
+
+ 
+
+"Resources" : {
+
+
+ 
+
+
+"VPCProd" : {
+      "Type" : "AWS::EC2::VPC",
+      "Properties" : {
+        "CidrBlock" : {"Ref": "prodVNetworkCIDR"},
+		"Tags": [        {"Key": "Name","Value": "Prod_Network"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+        
+      }
+    },
+	"InternetGatewayProd" : {
+      "Type" : "AWS::EC2::InternetGateway",
+      "Properties" : {
+        "Tags": [                {"Key": "Name","Value": "Prod_IGW"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+      }
+    },
+
+    "AttachGatewayProd" : {
+       "Type" : "AWS::EC2::VPCGatewayAttachment",
+       "Properties" : {
+         "VpcId" : { "Ref" : "VPCProd" },
+         "InternetGatewayId" : { "Ref" : "InternetGatewayProd" }
+       }
+    },
+	
+	"VPNGatewayProd" : {
+         "Type" : "AWS::EC2::VPNGateway",
+         "Properties" : {
+            "Type" : "ipsec.1",
+            "Tags": [{"Key": "Name","Value": "Prod_VPG"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+         }
+   },
+   
+	"AttachVpnGatewayProd" : {
+		"Type" : "AWS::EC2::VPCGatewayAttachment",
+		"Properties" : {
+			"VpcId" : { "Ref" : "VPCProd" },
+			"VpnGatewayId" : { "Ref" : "VPNGatewayProd" }
+		}
+	},
+
+	"ProdNAT" : {
+		"DependsOn" : "InternetGatewayProd",
+		"Type" : "AWS::EC2::NatGateway",
+		"Properties" : {
+			"AllocationId" : { "Fn::GetAtt" : ["ProdEIP", "AllocationId"]},
+			"SubnetId" : { "Ref" : "ProdSubnetAZ1Management"},
+			"Tags": [{"Key": "Name","Value": "Prod_NAT"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+		}
+	},
+
+	"ProdEIP" : {
+		"Type" : "AWS::EC2::EIP",
+		"Properties" : {
+		"Domain" : "VPCProd"
+		}
+	},
+
+	"ProdRoute" : {
+		"Type" : "AWS::EC2::Route",
+		"Properties" : {
+			"RouteTableId" : { "Ref" : "PrivateRouteTableProd" },
+			"DestinationCidrBlock" : "0.0.0.0/0",
+			"NatGatewayId" : { "Ref" : "ProdNAT" }
+		}
+	},
+	
+
+    "PublicRouteTableProd" : {
+      "Type" : "AWS::EC2::RouteTable",
+      "Properties" : {
+        "VpcId" : {"Ref" : "VPCProd"},
+        "Tags": [{"Key": "Name","Value": "Prod_RT-ToInternet"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+      }
+    },
+
+    "PublicRouteProd" : {
+      "Type" : "AWS::EC2::Route",
+      "DependsOn" : "AttachGatewayProd",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "PublicRouteTableProd" },
+        "DestinationCidrBlock" : "0.0.0.0/0",
+        "GatewayId" : { "Ref" : "InternetGatewayProd" }
+      }
+    },
+
+	"PrivateRouteTableProd" : {
+      "Type" : "AWS::EC2::RouteTable",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPCProd" },
+        "Tags": [{"Key": "Name","Value": "Prod_RT-ToPrivate"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+      }
+    },
+	
+    "ProdSubnetAZ1Management" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPCProd" },
+        "CidrBlock" : {"Ref" : "prodPubZ1SbntCIDR"},
+		 "AvailabilityZone": {"Ref" : "AvailabiltyZone1"},
+		 "Tags": [{"Key": "Name","Value": "Prod_SbntPublicZ1"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+      }
+    },
+	
+	"ProdSubnetAZ1ManagementAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "ProdSubnetAZ1Management" },
+        "RouteTableId" : { "Ref" : "PublicRouteTableProd" }
+      }
+    },
+	
+	"ProdPublicSubnetNetworkAcl" : {
+      "Type" : "AWS::EC2::NetworkAcl",
+      "Properties" : {
+        "VpcId" : {"Ref" : "VPCProd"},
+		"Tags": [{"Key": "Name","Value": "Prod_PublicNACL"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+       
+      }
+    },
+
+	
+	"ProdPublicSubnetInBoundHTTPSNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "ProdPublicSubnetNetworkAcl"},
+        "RuleNumber" : "100",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "443", "To" : "443"}
+      }
+    },
+	
+	"ProdPublicSubnetInboundCustomTCPRuleNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "ProdPublicSubnetNetworkAcl"},
+        "RuleNumber" : "140",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1024", "To" : "65535"}
+      }
+    },
+
+	
+    "ProdPublicSubnetInboundHTTPNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "ProdPublicSubnetNetworkAcl"},
+        "RuleNumber" : "200",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : {"Ref": "prodVNetworkCIDR"},
+        "PortRange" : {"From" : "80", "To" : "80"}
+      }
+    },
+	
+	
+    "ProdPublicSubnetInboundSSHNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "ProdPublicSubnetNetworkAcl"},
+        "RuleNumber" : "210",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "22", "To" : "22"}
+      }
+    },
+	
+
+    "ProdPublicSubnetOutBoundCustomTCP1NetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "ProdPublicSubnetNetworkAcl"},
+        "RuleNumber" : "100",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+
+    "ProdPublicSubnetOutBoundCustomTCP2NetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "ProdPublicSubnetNetworkAcl"},
+        "RuleNumber" : "140",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1024", "To" : "65535"}
+      }
+    },
+	
+    "ProdSubnetAZ1ManagementSubnetNetworkAclAssociation" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "ProdSubnetAZ1Management" },
+        "NetworkAclId" : { "Ref" : "ProdPublicSubnetNetworkAcl" }
+      }
+    },
+	
+
+	
+   "ProdSubnetAZ1Application" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPCProd" },
+        "CidrBlock" : {"Ref" : "prodApplZ1SbntCIDR"},
+		 "AvailabilityZone": {"Ref" : "AvailabiltyZone1"},
+		 "Tags": [{"Key": "Name","Value": "Prod_SbntAppZ1"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+      }
+    },
+	
+	"ProdSubnetAZ1ApplicationAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "ProdSubnetAZ1Application" },
+        "RouteTableId" : { "Ref" : "PrivateRouteTableProd" }
+      }
+    },
+	
+	
+  	"ProdPrivateAppSubnetNetworkAcl" : {
+      "Type" : "AWS::EC2::NetworkAcl",
+      "Properties" : {
+        "VpcId" : {"Ref" : "VPCProd"},
+		"Tags": [{"Key": "Name","Value": "Prod_AppNACL"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				]
+       
+      }
+    },
+
+    "ProdPrivateAppSubnetInboundCustomTCPNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "ProdPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "120",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : {"Ref": "prodVNetworkCIDR"},
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+
+   
+
+    "ProdPrivateAppSubnetInboundSSHNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "ProdPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "125",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "10.10.0.0/16",
+        "PortRange" : {"From" : "22", "To" : "22"}
+      }
+    },
+	
+	"ProdPrivateAppSubnetInboundSSHPubNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "ProdPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "130",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "22", "To" : "22"}
+      }
+    },
+		
+		
+	"ProdPrivateAppSubnetInboundCustomTCPPubNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "ProdPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "140",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1024", "To" : "65535"}
+      }
+    },
+	
+    "ProdPrivateAppSubnetOutBoundCustomTCPNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "ProdPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "100",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+
+    "ProdPrivateAppSubnetOutBoundCustomTCP2NetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "ProdPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "120",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+	
+	"ProdSubnetAppAZ1SubnetNetworkAclAssociation" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "ProdSubnetAZ1Application" },
+        "NetworkAclId" : { "Ref" : "ProdPrivateAppSubnetNetworkAcl" }
+      }
+    },
+
+	
+
+	
+	
+	"ProdSubnetAZ1Database" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPCProd" },
+        "CidrBlock" : {"Ref" : "prodDBZ1SbntCIDR"},
+		 "AvailabilityZone": {"Ref" : "AvailabiltyZone1"},
+		 "Tags": [{"Key": "Name","Value": "Prod_SbntDBZ1"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				]
+      }
+    },
+	
+	"ProdSubnetAZ1DatabaseAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "ProdSubnetAZ1Database" },
+        "RouteTableId" : { "Ref" : "PrivateRouteTableProd" }
+      }
+    },
+	
+		"ProdPrivateDBSubnetNetworkAcl" : {
+      "Type" : "AWS::EC2::NetworkAcl",
+      "Properties" : {
+        "VpcId" : {"Ref" : "VPCProd"},
+		"Tags": [{"Key": "Name","Value": "Prod_DB_NACL"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				]
+       
+      }
+    },
+
+    "ProdPrivateDBSubnetInboundCustomTCPNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "ProdPrivateDBSubnetNetworkAcl"},
+        "RuleNumber" : "120",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : {"Ref": "prodVNetworkCIDR"},
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+
+   
+
+    "ProdPrivateDBSubnetInboundSSHNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "ProdPrivateDBSubnetNetworkAcl"},
+        "RuleNumber" : "125",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "10.10.0.0/16",
+        "PortRange" : {"From" : "22", "To" : "22"}
+      }
+    },
+	
+	"ProdPrivateDBSubnetInboundSSHPubNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "ProdPrivateDBSubnetNetworkAcl"},
+        "RuleNumber" : "130",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "22", "To" : "22"}
+      }
+    },
+		
+		
+	"ProdPrivateDBSubnetInboundCustomTCPPubNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "ProdPrivateDBSubnetNetworkAcl"},
+        "RuleNumber" : "140",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1024", "To" : "65535"}
+      }
+    },
+	
+    "ProdPrivateDBSubnetOutBoundCustomTCPNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "ProdPrivateDBSubnetNetworkAcl"},
+        "RuleNumber" : "100",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+
+    "ProdPrivateDBSubnetOutBoundCustomTCP2NetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "ProdPrivateDBSubnetNetworkAcl"},
+        "RuleNumber" : "120",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+	
+	"ProdSubnetAZ1DBSubnetNetworkAclAssociation" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "ProdSubnetAZ1Database" },
+        "NetworkAclId" : { "Ref" : "ProdPrivateDBSubnetNetworkAcl" }
+      }
+    },
+
+
+
+	
+	"VPCqa" : {
+      "Type" : "AWS::EC2::VPC",
+      "Properties" : {
+        "CidrBlock" : {"Ref": "qaVNetworkCIDR"},
+		"Tags": [{"Key": "Name","Value": "qa_Network"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+      }
+    },
+	
+	"InternetGatewayqa" : {
+      "Type" : "AWS::EC2::InternetGateway",
+      "Properties" : {
+        "Tags": [{"Key": "Name","Value": "qa_IGW"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+      }
+    },
+
+    "AttachGatewayqa" : {
+       "Type" : "AWS::EC2::VPCGatewayAttachment",
+       "Properties" : {
+         "VpcId" : { "Ref" : "VPCqa" },
+         "InternetGatewayId" : { "Ref" : "InternetGatewayqa" }
+       }
+    },
+	
+	"VPNGatewayqa" : {
+         "Type" : "AWS::EC2::VPNGateway",
+         "Properties" : {
+            "Type" : "ipsec.1",
+            "Tags": [{"Key": "Name","Value": "qa_VPG"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				
+                                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+         }
+   },
+   
+	"AttachVpnGatewayqa" : {
+		"Type" : "AWS::EC2::VPCGatewayAttachment",
+		"Properties" : {
+			"VpcId" : { "Ref" : "VPCqa" },
+			"VpnGatewayId" : { "Ref" : "VPNGatewayqa" }
+		}
+	},
+
+	"qaNAT" : {
+		"DependsOn" : "InternetGatewayqa",
+		"Type" : "AWS::EC2::NatGateway",
+		"Properties" : {
+			"AllocationId" : { "Fn::GetAtt" : ["qaEIP", "AllocationId"]},
+			"SubnetId" : { "Ref" : "qaSubnetAZ1Management"},
+			"Tags": [{"Key": "Name","Value": "qa_NAT"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				
+                                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+		}
+	},
+
+	"qaEIP" : {
+		"Type" : "AWS::EC2::EIP",
+		"Properties" : {
+			"Domain" : "VPCqa"
+		}
+	},
+
+
+
+    "PublicRouteTableqa" : {
+      "Type" : "AWS::EC2::RouteTable",
+      "Properties" : {
+        "VpcId" : {"Ref" : "VPCqa"},
+        "Tags": [{"Key": "Name","Value": "qa_RT-ToInternet"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+      }
+    },
+
+    "PublicRouteqa" : {
+      "Type" : "AWS::EC2::Route",
+      "DependsOn" : "AttachGatewayqa",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "PublicRouteTableqa" },
+        "DestinationCidrBlock" : "0.0.0.0/0",
+        "GatewayId" : { "Ref" : "InternetGatewayqa" }
+      }
+    },
+
+	"PrivateRouteTableqa" : {
+      "Type" : "AWS::EC2::RouteTable",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPCqa" },
+        "Tags": [{"Key": "Name","Value": "qa_RT-ToPrivate"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},			
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+      }
+    },
+	"qaRoute" : {
+		"Type" : "AWS::EC2::Route",
+		"DependsOn" : "qaNAT",
+		"Properties" : {
+			"RouteTableId" : { "Ref" : "PrivateRouteTableqa" },
+			"DestinationCidrBlock" : "0.0.0.0/0",
+			"NatGatewayId" : { "Ref" : "qaNAT" }
+		}
+	},
+		
+    "qaSubnetAZ1Management" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPCqa" },
+        "CidrBlock" : {"Ref" : "qaPubZ1SbntCIDR"},
+		 "AvailabilityZone": {"Ref" : "AvailabiltyZone1"},
+		 "Tags": [{"Key": "Name","Value": "qa_SbntPublicZ1"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+			
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+      }
+    },
+	
+	"qaSubnetAZ1ManagementAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "qaSubnetAZ1Management" },
+        "RouteTableId" : { "Ref" : "PublicRouteTableqa" }
+      }
+    },
+	
+	"qaPublicSubnetNetworkAcl" : {
+      "Type" : "AWS::EC2::NetworkAcl",
+      "Properties" : {
+        "VpcId" : {"Ref" : "VPCqa"},
+		"Tags": [{"Key": "Name","Value": "qa_PublicNACL"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+       
+      }
+    },
+
+	
+	"qaPublicSubnetInBoundHTTPSNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "qaPublicSubnetNetworkAcl"},
+        "RuleNumber" : "100",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "443", "To" : "443"}
+      }
+    },
+	
+	"qaPublicSubnetInboundCustomTCPRuleNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "qaPublicSubnetNetworkAcl"},
+        "RuleNumber" : "140",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1024", "To" : "65535"}
+      }
+    },
+
+	
+    "qaPublicSubnetInboundHTTPNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "qaPublicSubnetNetworkAcl"},
+        "RuleNumber" : "200",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : {"Ref": "qaVNetworkCIDR"},
+        "PortRange" : {"From" : "80", "To" : "80"}
+      }
+    },
+	
+	
+    "qaPublicSubnetInboundSSHNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "qaPublicSubnetNetworkAcl"},
+        "RuleNumber" : "210",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "22", "To" : "22"}
+      }
+    },
+	
+
+    "qaPublicSubnetOutBoundCustomTCP1NetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "qaPublicSubnetNetworkAcl"},
+        "RuleNumber" : "100",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+
+    "qaPublicSubnetOutBoundCustomTCP2NetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "qaPublicSubnetNetworkAcl"},
+        "RuleNumber" : "145",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1024", "To" : "65535"}
+      }
+    },
+	
+    "qaSubnetAZ1ManagementSubnetNetworkAclAssociation" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "qaSubnetAZ1Management" },
+        "NetworkAclId" : { "Ref" : "qaPublicSubnetNetworkAcl" }
+      }
+    },
+	
+
+	
+   "qaSubnetAZ1Application" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPCqa" },
+        "CidrBlock" : {"Ref" : "qaApplZ1SbntCIDR"},
+		 "AvailabilityZone": {"Ref" : "AvailabiltyZone1"},
+		 "Tags": [{"Key": "Name","Value": "qa_SbntAppZ1"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+      }
+    },
+	
+	"qaSubnetAZ1ApplicationAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "qaSubnetAZ1Application" },
+        "RouteTableId" : { "Ref" : "PrivateRouteTableqa" }
+      }
+    },
+	
+	
+  	"qaPrivateAppSubnetNetworkAcl" : {
+      "Type" : "AWS::EC2::NetworkAcl",
+      "Properties" : {
+        "VpcId" : {"Ref" : "VPCqa"},
+		"Tags": [{"Key": "Name","Value": "qa_AppNACL"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+			
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				]
+      }
+    },
+
+    "qaPrivateAppSubnetInboundCustomTCPNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "qaPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "120",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : {"Ref": "qaVNetworkCIDR"},
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+
+   
+
+    "qaPrivateAppSubnetInboundSSHNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "qaPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "128",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "10.10.0.0/16",
+        "PortRange" : {"From" : "22", "To" : "22"}
+      }
+    },
+	
+	"qaPrivateAppSubnetInboundSSHPubNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "qaPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "131",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "22", "To" : "22"}
+      }
+    },
+		
+		
+	"qaPrivateAppSubnetInboundCustomTCPPubNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "qaPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "143",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1024", "To" : "65535"}
+      }
+    },
+	
+    "qaPrivateAppSubnetOutBoundCustomTCPNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "qaPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "101",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+
+    "qaPrivateAppSubnetOutBoundCustomTCP2NetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "qaPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "127",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+	
+	"qaSubnetAZ1PresSubnetNetworkAclAssociation" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "qaSubnetAZ1Application" },
+        "NetworkAclId" : { "Ref" : "qaPrivateAppSubnetNetworkAcl" }
+      }
+    },
+
+	
+
+	
+	"qaSubnetAZ1Database" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPCqa" },
+        "CidrBlock" : {"Ref" : "qaDBZ1SbntCIDR"},
+		 "AvailabilityZone": {"Ref" : "AvailabiltyZone1"},
+		 "Tags": [{"Key": "Name","Value": "qa_SbntDBZ1"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				
+                                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				]
+      }
+    },
+	
+	"qaSubnetAZ1DatabaseAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "qaSubnetAZ1Database" },
+        "RouteTableId" : { "Ref" : "PrivateRouteTableqa" }
+      }
+    },
+	
+		"qaPrivateDBSubnetNetworkAcl" : {
+      "Type" : "AWS::EC2::NetworkAcl",
+      "Properties" : {
+        "VpcId" : {"Ref" : "VPCqa"},
+		"Tags": [{"Key": "Name","Value": "qa_DB_NACL"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				
+                                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				]
+       
+      }
+    },
+
+    "qaPrivateDBSubnetInboundCustomTCPNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "qaPrivateDBSubnetNetworkAcl"},
+        "RuleNumber" : "120",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : {"Ref": "qaVNetworkCIDR"},
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+
+   
+
+    "qaPrivateDBSubnetInboundSSHNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "qaPrivateDBSubnetNetworkAcl"},
+        "RuleNumber" : "125",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "10.10.0.0/16",
+        "PortRange" : {"From" : "22", "To" : "22"}
+      }
+    },
+	
+	"qaPrivateDBSubnetInboundSSHPubNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "qaPrivateDBSubnetNetworkAcl"},
+        "RuleNumber" : "130",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "22", "To" : "22"}
+      }
+    },
+		
+		
+	"qaPrivateDBSubnetInboundCustomTCPPubNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "qaPrivateDBSubnetNetworkAcl"},
+        "RuleNumber" : "104",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1024", "To" : "65535"}
+      }
+    },
+	
+    "qaPrivateDBSubnetOutBoundCustomTCPNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "qaPrivateDBSubnetNetworkAcl"},
+        "RuleNumber" : "102",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+
+    "qaPrivateDBSubnetOutBoundCustomTCP2NetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "qaPrivateDBSubnetNetworkAcl"},
+        "RuleNumber" : "120",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+	
+	"qaSubnetAZ1DBSubnetNetworkAclAssociation" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "qaSubnetAZ1Database" },
+        "NetworkAclId" : { "Ref" : "qaPrivateDBSubnetNetworkAcl" }
+      }
+    },
+
+	
+
+	
+	"VPCdev" : {
+      "Type" : "AWS::EC2::VPC",
+      "Properties" : {
+        "CidrBlock" : {"Ref": "devVNetworkCIDR"},
+		"Tags": [{"Key": "Name","Value": "dev_Network"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+        
+      }
+    },
+	
+	"InternetGatewaydev" : {
+      "Type" : "AWS::EC2::InternetGateway",
+      "Properties" : {
+        "Tags": [{"Key": "Name","Value": "dev_IGW"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+      }
+    },
+
+    "AttachGatewaydev" : {
+       "Type" : "AWS::EC2::VPCGatewayAttachment",
+       "Properties" : {
+         "VpcId" : { "Ref" : "VPCdev" },
+         "InternetGatewayId" : { "Ref" : "InternetGatewaydev" }
+       }
+    },
+	
+	"VPNGatewaydev" : {
+         "Type" : "AWS::EC2::VPNGateway",
+         "Properties" : {
+            "Type" : "ipsec.1",
+            "Tags": [{"Key": "Name","Value": "dev_VPG"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+         }
+   },
+   
+	"AttachVpnGatewaydev" : {
+		"Type" : "AWS::EC2::VPCGatewayAttachment",
+		"Properties" : {
+			"VpcId" : { "Ref" : "VPCdev" },
+			"VpnGatewayId" : { "Ref" : "VPNGatewaydev" }
+		}
+	},
+
+	"devNAT" : {
+		"DependsOn" : "InternetGatewaydev",
+		"Type" : "AWS::EC2::NatGateway",
+		"Properties" : {
+			"AllocationId" : { "Fn::GetAtt" : ["devEIP", "AllocationId"]},
+			"SubnetId" : { "Ref" : "devPubZ1Sbnt"},
+			"Tags": [{"Key": "Name","Value": "dev_NAT"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+			
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+		}
+	},
+
+	"devEIP" : {
+		"Type" : "AWS::EC2::EIP",
+		"Properties" : {
+		"Domain" : "VPCdev"
+		}
+	},
+
+	"devRoute" : {
+		"Type" : "AWS::EC2::Route",
+		"Properties" : {
+			"RouteTableId" : { "Ref" : "PrivateRouteTabledev" },
+			"DestinationCidrBlock" : "0.0.0.0/0",
+			"NatGatewayId" : { "Ref" : "devNAT" }
+		}
+	},
+	
+
+    "PublicRouteTabledev" : {
+      "Type" : "AWS::EC2::RouteTable",
+      "Properties" : {
+        "VpcId" : {"Ref" : "VPCdev"},
+        "Tags": [{"Key": "Name","Value": "dev_RT-ToInternet"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+      }
+    },
+
+    "PublicRoutedev" : {
+      "Type" : "AWS::EC2::Route",
+      "DependsOn" : "AttachGatewaydev",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "PublicRouteTabledev" },
+        "DestinationCidrBlock" : "0.0.0.0/0",
+        "GatewayId" : { "Ref" : "InternetGatewaydev" }
+      }
+    },
+
+	"PrivateRouteTabledev" : {
+      "Type" : "AWS::EC2::RouteTable",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPCdev" },
+       "Tags": [{"Key": "Name","Value": "dev_RT-ToPrivate"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+      }
+    },
+	
+	
+	
+	
+	
+    "devPubZ1Sbnt" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPCdev" },
+        "CidrBlock" : {"Ref" : "devPubZ1SbntCIDR"},
+		 "AvailabilityZone": {"Ref" : "AvailabiltyZone1"},
+		  "Tags": [{"Key": "Name","Value": "dev_SbntPublicZ1"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+      }
+    },
+	
+	"devPubZ1SbntAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "devPubZ1Sbnt" },
+        "RouteTableId" : { "Ref" : "PublicRouteTabledev" }
+      }
+    },
+	
+	"devPublicSubnetNetworkAcl" : {
+      "Type" : "AWS::EC2::NetworkAcl",
+      "Properties" : {
+        "VpcId" : {"Ref" : "VPCdev"},
+		"Tags": [{"Key": "Name","Value": "dev_PublicNACL"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				]
+       
+      }
+    },
+
+	
+	"devPublicSubnetInBoundHTTPSNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPublicSubnetNetworkAcl"},
+        "RuleNumber" : "100",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "443", "To" : "443"}
+      }
+    },
+	
+	"devPublicSubnetInBounddHTTPSNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPublicSubnetNetworkAcl"},
+        "RuleNumber" : "103",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "80", "To" : "80"}
+      }
+    },
+	
+	"devPublicSubnetInboundCustomTCPRuleNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPublicSubnetNetworkAcl"},
+        "RuleNumber" : "140",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "0", "To" : "65535"}
+      }
+    },
+
+	
+    "devPublicSubnetInboundHTTPNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPublicSubnetNetworkAcl"},
+        "RuleNumber" : "201",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "9090", "To" : "9090"}
+      }
+    },
+	
+	
+    "devPublicSubnetInboundSSHNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPublicSubnetNetworkAcl"},
+        "RuleNumber" : "210",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "22", "To" : "22"}
+      }
+    },
+	
+
+    "devPublicSubnetOutBoundCustomTCP1NetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPublicSubnetNetworkAcl"},
+        "RuleNumber" : "190",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+
+    "devPublicSubnetOutBoundCustomTCP2NetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPublicSubnetNetworkAcl"},
+        "RuleNumber" : "144",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "0", "To" : "65535"}
+      }
+    },
+	
+	"devPublicSubnetOutpostBoundCustomaTCP2NetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPublicSubnetNetworkAcl"},
+        "RuleNumber" : "148",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "9090", "To" : "9090"}
+      }
+    },
+	"devPublicSubnetOutpostBoundCustomTnCP2NetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPublicSubnetNetworkAcl"},
+        "RuleNumber" : "146",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "80", "To" : "80"}
+      }
+    },
+	"devPublicSubnetOutpostBoundCustomTcCP2NetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPublicSubnetNetworkAcl"},
+        "RuleNumber" : "161",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "443", "To" : "443"}
+      }
+    },
+	
+    "devPubZ1SbntSubnetNetworkAclAssociation" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "devPubZ1Sbnt" },
+        "NetworkAclId" : { "Ref" : "devPublicSubnetNetworkAcl" }
+      }
+    },
+	
+	
+	
+
+  
+	
+   "devSubnetAZ1Application" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPCdev" },
+        "CidrBlock" : {"Ref" : "devApplZ1SbntCIDR"},
+		 "AvailabilityZone": {"Ref" : "AvailabiltyZone1"},
+		 "Tags": [{"Key": "Name","Value": "dev_SbntAppZ1"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+      }
+    },
+	
+	"devSubnetAZ1ApplicationAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "devSubnetAZ1Application" },
+        "RouteTableId" : { "Ref" : "PrivateRouteTabledev" }
+      }
+    },
+	
+	
+  	"devPrivateAppSubnetNetworkAcl" : {
+      "Type" : "AWS::EC2::NetworkAcl",
+      "Properties" : {
+        "VpcId" : {"Ref" : "VPCdev"},
+		"Tags": [{"Key": "Name","Value": "dev_AppNACL"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				]
+       
+      }
+    },
+
+    "devPrivateAppSubnetInboundCustomTCPNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "126",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+	    "devPrivateAppSubnetInboundCustzomTCPNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "136",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "9090", "To" : "9090"}
+      }
+    },
+	    "devPrivateAppSubnetInboundCustombTCPbNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "166",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "443", "To" : "443"}
+      }
+    },
+	    "devPrivateAppSubnetInboundCustomTCPaNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "179",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "80", "To" : "80"}
+      }
+    },
+	    "devPrivateAppSubnetInboundCustomTCPNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "156",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "0", "To" : "65535"}
+      }
+    },
+	
+	
+    "devPrivateAppSubnetInboundCustotmTCPNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "123",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "80", "To" : "80"}
+      }
+    },
+	
+	
+    "devPrivateAppSubnetInboundCustomTCPNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "122",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+
+   
+
+    "devPrivateAppSubnetInboundSSHNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "125",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "10.10.0.0/16",
+        "PortRange" : {"From" : "22", "To" : "22"}
+      }
+    },
+	
+	"devPrivateAppSubnetInboundSSHPubNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "133",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "22", "To" : "22"}
+      }
+    },
+		
+		
+	"devPrivateAppSubnetInboundCustomTCPPubNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "147",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "0", "To" : "65535"}
+      }
+    },
+	
+    "devPrivateAppSubnetOutBoundCustomTCPNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "106",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+
+    "devPrivateAppSubnetOutBoundCustomTCP2NetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "124",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "9090", "To" : "9090"}
+      }
+    },
+	 "devPrivateAppSubnetOutposBoundCustomTCP2NetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "128",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "80", "To" : "80"}
+      }
+    },
+	
+	 "devPrivateAppSubnetOutpostBoundCustomTCP2NetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "127",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "443", "To" : "443"}
+      }
+    },
+	
+	
+	"devSubnetAZ1ApplicationSubnetNetworkAclAssociation" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "devSubnetAZ1Application" },
+        "NetworkAclId" : { "Ref" : "devPrivateAppSubnetNetworkAcl" }
+      }
+    },
+
+	
+	
+	"devSubnetAZ1Database" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPCdev" },
+        "CidrBlock" : {"Ref" : "devDBZ1SbntCIDR"},
+		 "AvailabilityZone": {"Ref" : "AvailabiltyZone1"},
+		 "Tags": [{"Key": "Name","Value": "dev_SbntDBZ1"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				]
+      }
+    },
+
+    "devSubnetAZ2Database" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPCdev" },
+        "CidrBlock" : {"Ref" : "devDBZ2SbntCIDR"},
+		 "AvailabilityZone": {"Ref" : "AvailabiltyZone2"},
+		 "Tags": [{"Key": "Name","Value": "dev_SbntDBZ2"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				]
+      }
+    },
+	
+	"devSubnetAZ1DatabaseAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "devSubnetAZ1Database" },
+        "RouteTableId" : { "Ref" : "PrivateRouteTabledev" }
+      }
+    },
+    "devSubnetAZ2DatabaseAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "devSubnetAZ2Database" },
+        "RouteTableId" : { "Ref" : "PrivateRouteTabledev" }
+      }
+    },
+	
+		"devPrivateDBSubnetNetworkAcl" : {
+      "Type" : "AWS::EC2::NetworkAcl",
+      "Properties" : {
+        "VpcId" : {"Ref" : "VPCdev"},
+		"Tags": [{"Key": "Name","Value": "dev_DB_NACL"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				]
+       
+      }
+    },
+
+    "devPrivateDBSubnetInboundCustomTCPNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateAppSubnetNetworkAcl"},
+        "RuleNumber" : "120",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : {"Ref": "devVNetworkCIDR"},
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+
+   
+
+    "devPrivateDBSubnetInboundSSHNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateDBSubnetNetworkAcl"},
+        "RuleNumber" : "125",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "10.10.0.0/16",
+        "PortRange" : {"From" : "22", "To" : "22"}
+      }
+    },
+	
+	"devPrivateDBSubnetInboundSSHPubNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateDBSubnetNetworkAcl"},
+        "RuleNumber" : "130",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "22", "To" : "22"}
+      }
+    },
+		
+		
+	"devPrivateDBSubnetInboundCustomTCPPubNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateDBSubnetNetworkAcl"},
+        "RuleNumber" : "140",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "false",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1024", "To" : "65535"}
+      }
+    },
+	
+    "devPrivateDBSubnetOutBoundCustomTCPNetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateDBSubnetNetworkAcl"},
+        "RuleNumber" : "100",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+
+    "devPrivateDBSubnetOutBoundCustomTCP2NetworkAclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "NetworkAclId" : {"Ref" : "devPrivateDBSubnetNetworkAcl"},
+        "RuleNumber" : "120",
+        "Protocol" : "6",
+        "RuleAction" : "allow",
+        "Egress" : "true",
+        "CidrBlock" : "0.0.0.0/0",
+        "PortRange" : {"From" : "1", "To" : "65535"}
+      }
+    },
+	
+	"devSubnetAZ1DBSubnetNetworkAclAssociation" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "devSubnetAZ1Database" },
+        "NetworkAclId" : { "Ref" : "devPrivateDBSubnetNetworkAcl" }
+      }
+    },	
+    "devSubnetAZ2DBSubnetNetworkAclAssociation" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "devSubnetAZ2Database" },
+        "NetworkAclId" : { "Ref" : "devPrivateDBSubnetNetworkAcl" }
+      }
+    },
+	
+	"VpcPeeringConnectionMngmntProd": {
+      "Type": "AWS::EC2::VPCPeeringConnection",
+      "Properties": {
+        "VpcId": "vpc-d07aa4b7",
+        "PeerVpcId": { "Ref": "VPCProd" },
+        "PeerOwnerId": { "Ref": "AccountIdVPCPeering" },
+		"Tags": [{"Key": "Name","Value": "Public-To-Prod"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+      }
+    },
+        "VpcPeeringConnectionMngmntQa": {
+      "Type": "AWS::EC2::VPCPeeringConnection",
+      "Properties": {
+        "VpcId": "vpc-d07aa4b7",
+        "PeerVpcId": { "Ref": "VPCqa" },
+        "PeerOwnerId": { "Ref": "AccountIdVPCPeering" },
+		"Tags": [{"Key": "Name","Value": "Public-To-QA"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+      }
+    },
+	
+	
+	"VpcPeeringConnectionMngmntDev": {
+      "Type": "AWS::EC2::VPCPeeringConnection",
+      "Properties": {
+        "VpcId": "vpc-d07aa4b7",
+        "PeerVpcId": { "Ref": "VPCdev" },
+        "PeerOwnerId": { "Ref": "AccountIdVPCPeering" },
+		"Tags": [{"Key": "Name","Value": "Public-To-Dev"},
+				 {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }    
+				] 
+      }
+    },
+    
+    "PrivateRouteProd" : {
+      "Type" : "AWS::EC2::Route",      
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "PrivateRouteTableProd" },
+        "DestinationCidrBlock" :  "10.10.0.0/16",
+         "VpcPeeringConnectionId" :  { "Ref" : "VpcPeeringConnectionMngmntProd" }
+      }
+    },
+    "PublicRoute3Prod" : {
+      "Type" : "AWS::EC2::Route",    
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "PublicRouteTableProd" },
+        "DestinationCidrBlock" :  "10.10.0.0/16",
+        "VpcPeeringConnectionId" :  { "Ref" : "VpcPeeringConnectionMngmntProd" }
+      }
+    },
+    "PrivateRoute2Prod" : {
+      "Type" : "AWS::EC2::Route",  
+      "Properties" : {
+        "RouteTableId" : "rtb-e0d68d87",
+        "DestinationCidrBlock" :  { "Ref" : "prodVNetworkCIDR" },
+        "VpcPeeringConnectionId" :  { "Ref" : "VpcPeeringConnectionMngmntProd" }
+      }
+    },
+    "PublicRoute2Prod" : {
+      "Type" : "AWS::EC2::Route",
+      "Properties" : {
+        "RouteTableId" : "rtb-cad08bad",
+        "DestinationCidrBlock" :  { "Ref" : "prodVNetworkCIDR" },
+        "VpcPeeringConnectionId" :  { "Ref" : "VpcPeeringConnectionMngmntProd" }
+      }
+    },
+    "PublicRouteQA" : {
+      "Type" : "AWS::EC2::Route",
+      "DependsOn" : "AttachGatewayProd",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "PublicRouteTableqa" },
+        "DestinationCidrBlock" :  "10.10.0.0/16",
+        "VpcPeeringConnectionId" :  { "Ref" : "VpcPeeringConnectionMngmntQa" }
+      }
+    },
+    "PrivateRouteQA" : {
+      "Type" : "AWS::EC2::Route",
+      "DependsOn" : "AttachGatewayProd",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "PrivateRouteTableqa" },
+        "DestinationCidrBlock" :  "10.10.0.0/16",
+        "VpcPeeringConnectionId" :  { "Ref" : "VpcPeeringConnectionMngmntQa" }
+      }
+    },
+    "PrivateRoute2QA" : {
+      "Type" : "AWS::EC2::Route",
+      "DependsOn" : "AttachGatewayProd",
+      "Properties" : {
+        "RouteTableId" : "rtb-e0d68d87",
+        "DestinationCidrBlock" :  { "Ref" : "qaVNetworkCIDR" },
+        "VpcPeeringConnectionId" :  { "Ref" : "VpcPeeringConnectionMngmntQa" }
+      }
+    },
+    "PublicRoute2QA" : {
+      "Type" : "AWS::EC2::Route",
+      "DependsOn" : "AttachGatewayProd",
+      "Properties" : {
+        "RouteTableId" : "rtb-cad08bad",
+        "DestinationCidrBlock" :  { "Ref" : "qaVNetworkCIDR" },
+        "VpcPeeringConnectionId" :  { "Ref" : "VpcPeeringConnectionMngmntQa" }
+      }
+    },
+    "PublicRouteDev" : {
+      "Type" : "AWS::EC2::Route",
+     
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "PublicRouteTabledev" },
+        "DestinationCidrBlock" :  "10.10.0.0/16",
+        "VpcPeeringConnectionId" :  { "Ref" : "VpcPeeringConnectionMngmntDev" }
+      }
+    },
+    "PrivateRouteDev" : {
+      "Type" : "AWS::EC2::Route",  
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "PrivateRouteTabledev" },
+        "DestinationCidrBlock" :  "10.10.0.0/16",
+        "VpcPeeringConnectionId" :  { "Ref" : "VpcPeeringConnectionMngmntDev" }
+      }
+    },
+    "PrivateRoute2Dev" : {
+      "Type" : "AWS::EC2::Route",      
+      "Properties" : {
+        "RouteTableId" : "rtb-e0d68d87",
+        "DestinationCidrBlock" :  { "Ref" : "devVNetworkCIDR" },
+        "VpcPeeringConnectionId" :  { "Ref" : "VpcPeeringConnectionMngmntDev" }
+      }
+    },
+    "PublicRoute2Dev" : {
+      "Type" : "AWS::EC2::Route",     
+      "Properties" : {
+        "RouteTableId" : "rtb-cad08bad",
+        "DestinationCidrBlock" :  { "Ref" : "devVNetworkCIDR" },
+        "VpcPeeringConnectionId" :  { "Ref" : "VpcPeeringConnectionMngmntDev" }
+      }
+    },
+  "ProdVPCFlowLog" : {
+  "Type" : "AWS::EC2::FlowLog",
+  "Properties" : {
+    "DeliverLogsPermissionArn" : "arn:aws:iam::386777780151:role/flowlogsRole",
+    "LogGroupName" : { "Ref" : "LogGroupName" },
+    "ResourceId" : { "Ref" : "VPCProd" },
+    "ResourceType" : "VPC",
+    "TrafficType" : "ALL"
+      }
+     },
+  "QaVPCFlowLog" : {
+  "Type" : "AWS::EC2::FlowLog",
+  "Properties" : {
+    "DeliverLogsPermissionArn" : "arn:aws:iam::386777780151:role/flowlogsRole",
+    "LogGroupName" : { "Ref" : "LogGroupName" },
+    "ResourceId" : { "Ref" : "VPCqa" },
+    "ResourceType" : "VPC",
+    "TrafficType" : "ALL"
+     }
+    },
+  "DevVPCFlowLog" : {
+  "Type" : "AWS::EC2::FlowLog",
+  "Properties" : {
+    "DeliverLogsPermissionArn" : "arn:aws:iam::386777780151:role/flowlogsRole",
+    "LogGroupName" : { "Ref" : "LogGroupName" },
+    "ResourceId" : { "Ref" : "VPCdev" },
+    "ResourceType" : "VPC",
+    "TrafficType" : "ALL"
+    }  
+  } 
+
+},
+"Outputs" : {
+  
+    "DevVPCID" : {
+      "Value" : { "Ref" : "VPCdev" },
+      "Description" : "Dev VPC ID"
+    },
+    "QAVPCID" : {
+      "Value" : { "Ref" : "VPCqa" },
+      "Description" : "QA VPC ID"
+    },
+    "ProdVPCID" : {
+      "Value" : { "Ref" : "VPCProd" },
+      "Description" : "Prod VPC ID"
+    },
+    "DevWebSubnetID" : {
+      "Value" : { "Ref" : "devPubZ1Sbnt" },
+      "Description" : "Dev Web Subnet ID"
+    },
+    "DevAppSubnetID" : {
+      "Value" : { "Ref" : "devSubnetAZ1Application" },
+      "Description" : "Dev App Subnet ID"
+    },
+    "DevDBSubnetID" : {
+      "Value" : { "Ref" : "devSubnetAZ1Database" },
+      "Description" : "Dev DB Subnet ID"
+    },
+    "DevDBSubnet2ID" : {
+      "Value" : { "Ref" : "devSubnetAZ2Database" },
+      "Description" : "Dev DB Subnet ID"
+    },
+     "QAWebSubnetID" : {
+      "Value" : { "Ref" : "qaSubnetAZ1Management" },
+      "Description" : "QA Web Subnet ID"
+    },
+    "QAAppSubnetID" : {
+      "Value" : { "Ref" : "qaSubnetAZ1Application" },
+      "Description" : "QA  App Subnet ID"
+    },
+    "QADBSubnetID" : {
+      "Value" : { "Ref" : "qaSubnetAZ1Database" },
+      "Description" : "QA  DB Subnet ID"
+    },
+     "ProdWebSubnetID" : {
+      "Value" : { "Ref" : "ProdSubnetAZ1Management" },
+      "Description" : "Prod  Web Subnet ID"
+    },
+    "ProdAppSubnetID" : {
+      "Value" : { "Ref" : "ProdSubnetAZ1Application" },
+      "Description" : "Prod App Subnet ID"
+    },
+    "ProdDBSubnetID" : {
+      "Value" : { "Ref" : "ProdSubnetAZ1Database" },
+      "Description" : "Prod DB Subnet ID"
+    }
+  }
+}
+
+
+	

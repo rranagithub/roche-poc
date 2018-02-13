@@ -1,0 +1,146 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "EC2 deployment",
+"Metadata":{
+"AWS::CloudFormation::Interface": {
+ 
+			"ParameterGroups": [
+			    
+	                            {
+					"Label": {
+						"default": "EC2 Parameters"
+					},
+					"Parameters": [
+						"ImageId",
+						"InstanceType",
+						"SubnetId",
+						"SecurityGroupIds",
+						"KeyName"
+						
+						
+                                         
+                                           
+					]
+				   },                             
+                                    {
+					"Label": {
+						"default": "Tags"
+					},
+					"Parameters": [
+						"Tag1",
+						"Tag2",
+						"Tag3",
+						"Tag4",
+						"Tag5"
+					]
+				}
+				
+				
+			         ],                                                
+
+                            "ParameterLabels": {
+					
+                        "ImageId" : {"default":"AMI ID"},
+						"InstanceType" : {"default":"Instance Type"},
+						"SubnetId" : {"default":"SubnetId"},
+						"SecurityGroupIds" : {"default":"Security Group ID"},
+						"KeyName" : {"default":"EC2 Key Pair name"},                                              
+                        "Tag1":{"default":"Dept"},
+						"Tag2":{"default":"Environment"},
+						"Tag3":{"default":"CostCenter"},
+						"Tag4":{"default":"Region"},
+						"Tag5":{"default":"NetworkType"} 
+
+                      }
+		}
+    },
+
+ "Parameters" : {
+
+		"ImageId" : {
+			"Description": "CIDR of Management Network",
+			"Type": "String",
+			"Default": "ami-eb50cd8d"
+		
+		},
+		"InstanceType": {
+			"Description": "Public Tier Subnet CIDR block for AZ1 for Management Network.",
+			"Type": "String",
+			"Default": "t2.micro",
+			  "AllowedValues" : [ "t1.micro", "t2.micro", "t2.small", "t2.medium", "t2.large","m1.small", "m1.medium", "m1.large", "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge", "m4.large", "m4.xlarge", "m4.2xlarge", "m4.4xlarge", "m4.10xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge", "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "g2.2xlarge", "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "d2.xlarge",
+			  "d2.2xlarge", "d2.4xlarge", "d2.8xlarge", "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"]
+	
+		},
+        "SubnetId": {
+			"Description": "Subnet ID.",
+			"Type": "String",
+			"Default": "subnet-c60e718f"
+		
+	
+		},	
+		"SecurityGroupIds": {
+			"Description": "Security Group.",
+			"Type": "String",
+			"Default": "sg-78108601",
+			
+			"ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x and subnet of pVpc."
+		},	
+		"KeyName": {
+			"Description": "Key Name for EC2.",
+			"Type": "String",
+			"Default": "management",
+			
+			"ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x and subnet of pVpc."
+		},	
+
+
+"Tag1": {
+      "Type": "String",
+      "Default": "Mycloud"
+    },
+	
+	"Tag2": {
+      "Type": "String",
+      "Default": "Mngmnt"
+    },
+	
+	"Tag3": {
+      "Type": "String",
+      "Default": "Mycloud"
+    },
+	
+	"Tag4": {
+      "Type": "String",
+      "Default": "ap-northeast-1"
+    },
+	
+	"Tag5": {
+      "Type": "String",
+      "Default": "IPV4/6"
+    }
+	
+  },
+
+"Resources" : {
+    "EC2": {					
+   "Type" : "AWS::EC2::Instance",
+   "Properties" : {
+     
+     
+      "ImageId" : { "Ref" : "ImageId" },
+      "InstanceType" : { "Ref" : "InstanceType" },
+      "KeyName" : { "Ref" : "KeyName" },
+      "SecurityGroupIds" : ["sg-78108601"],
+      "SubnetId" : { "Ref" : "SubnetId" },
+      "Tags" : [ {"Key": "Name", "Value": "JenkinsServer"},
+	  {"Key": "Dept", "Value": {"Ref": "Tag1"}},
+				 {"Key": "Environment","Value": {"Ref": "Tag2"}},
+                 {"Key": "CostCenter","Value": {"Ref": "Tag3"} },
+				 {"Key": "Region","Value": {"Ref": "Tag4"} },
+				 {"Key": "NetworkType","Value": {"Ref": "Tag5"} }   
+				] 
+     
+   }}
+}
+}
